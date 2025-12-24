@@ -146,10 +146,16 @@ go get github.com/toutago/toutago-datamapper
 - [x] Multi-file loading
 - [x] Comprehensive tests (75%+ coverage)
 
-### Phase 3: Core Engine (Week 3-4) - 🔄 READY TO START
-- [ ] Orchestration engine
-- [ ] Property mapper
-- [ ] Adapter registry
+### Phase 3: Core Engine (Week 3-4) - ✅ COMPLETE
+- [x] Orchestration engine
+- [x] Property mapper (reflection-based)
+- [x] Adapter registry
+- [x] Comprehensive tests (55%+ coverage)
+
+### Phase 4: Reference Impl (Week 4-5) - 🔄 READY TO START
+- [ ] Filesystem adapter
+- [ ] Complete CRUD operations
+- [ ] Working examples
 
 ### Phases 4-7 - ⬜ Not Started
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for complete roadmap.
