@@ -1,0 +1,78 @@
+namespace: users
+version: "1.0"
+
+sources:
+  userdb:
+    adapter: filesystem
+    connection: "./data"
+
+mappings:
+  user-crud:
+    object: User
+    source: userdb
+    operations:
+      fetch:
+        statement: "users/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+        result:
+          type: User
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+            - object: Email
+              field: email
+            - object: Age
+              field: age
+      
+      insert:
+        statement: "users/{id}.json"
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+          - object: Email
+            field: email
+          - object: Age
+            field: age
+      
+      update:
+        statement: "users/{id}.json"
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+          - object: Email
+            field: email
+          - object: Age
+            field: age
+      
+      delete:
+        statement: "users/{id}.json"
+        identifier:
+          - object: ID
+            field: id
+  
+  user-list:
+    object: User
+    source: userdb
+    operations:
+      fetch:
+        statement: "users/*.json"
+        result:
+          type: User
+          multi: true
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+            - object: Email
+              field: email
+            - object: Age
+              field: age

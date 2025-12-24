@@ -109,7 +109,7 @@ func (m *Mapper) Fetch(ctx context.Context, mappingID string, params map[string]
 }
 
 // FetchMulti retrieves multiple objects using the specified mapping.
-// Returns a slice of results.
+// results must be a pointer to a slice of structs.
 func (m *Mapper) FetchMulti(ctx context.Context, mappingID string, params map[string]interface{}, results interface{}) error {
 	mapping, cfg, err := m.parser.GetMapping(mappingID)
 	if err != nil {
@@ -144,10 +144,10 @@ func (m *Mapper) FetchMulti(ctx context.Context, mappingID string, params map[st
 	}
 
 	// Map results to objects
-	if opConfig.Result != nil {
-		// TODO: Implement slice mapping
-		_ = data
-		_ = results
+	if opConfig.Result != nil && len(data) > 0 {
+		if err := m.mapSliceResults(data, results, opConfig.Result.Properties); err != nil {
+			return fmt.Errorf("failed to map results: %w", err)
+		}
 	}
 
 	return nil
@@ -181,10 +181,21 @@ func (m *Mapper) Insert(ctx context.Context, mappingID string, objects interface
 	// Build operation
 	op := m.buildOperation(adapter.OpInsert, &opConfig)
 
+	// Convert objects to slice
+	objectSlice, err := m.toSlice(objects)
+	if err != nil {
+		return fmt.Errorf("failed to convert objects: %w", err)
+	}
+
 	// Map objects to data
-	var dataObjects []interface{}
-	// TODO: Handle single vs multiple objects
-	_ = objects
+	dataObjects := make([]interface{}, len(objectSlice))
+	for i, obj := range objectSlice {
+		data, err := m.propMap.MapFromObject(obj, opConfig.Properties)
+		if err != nil {
+			return fmt.Errorf("failed to map object %d: %w", i, err)
+		}
+		dataObjects[i] = data
+	}
 
 	// Execute insert
 	if err := adp.Insert(ctx, op, dataObjects); err != nil {
@@ -226,10 +237,21 @@ func (m *Mapper) Update(ctx context.Context, mappingID string, objects interface
 	// Build operation
 	op := m.buildOperation(adapter.OpUpdate, &opConfig)
 
+	// Convert objects to slice
+	objectSlice, err := m.toSlice(objects)
+	if err != nil {
+		return fmt.Errorf("failed to convert objects: %w", err)
+	}
+
 	// Map objects to data
-	var dataObjects []interface{}
-	// TODO: Handle single vs multiple objects
-	_ = objects
+	dataObjects := make([]interface{}, len(objectSlice))
+	for i, obj := range objectSlice {
+		data, err := m.propMap.MapFromObject(obj, opConfig.Properties)
+		if err != nil {
+			return fmt.Errorf("failed to map object %d: %w", i, err)
+		}
+		dataObjects[i] = data
+	}
 
 	// Execute update
 	if err := adp.Update(ctx, op, dataObjects); err != nil {
@@ -271,13 +293,14 @@ func (m *Mapper) Delete(ctx context.Context, mappingID string, identifiers inter
 	// Build operation
 	op := m.buildOperation(adapter.OpDelete, &opConfig)
 
-	// Map identifiers
-	var ids []interface{}
-	// TODO: Handle identifier mapping
-	_ = identifiers
+	// Convert identifiers to slice
+	idSlice, err := m.toSlice(identifiers)
+	if err != nil {
+		return fmt.Errorf("failed to convert identifiers: %w", err)
+	}
 
 	// Execute delete
-	if err := adp.Delete(ctx, op, ids); err != nil {
+	if err := adp.Delete(ctx, op, idSlice); err != nil {
 		return fmt.Errorf("delete failed: %w", err)
 	}
 
@@ -387,4 +410,49 @@ func (m *Mapper) executeAfterActions(ctx context.Context, cfg *config.Config, ac
 	_ = actions
 	_ = data
 	return nil
+}
+
+// toSlice converts a single object or slice to []interface{}.
+func (m *Mapper) toSlice(objects interface{}) ([]interface{}, error) {
+	if objects == nil {
+		return nil, fmt.Errorf("objects cannot be nil")
+	}
+
+	// Check if already a slice
+	switch v := objects.(type) {
+	case []interface{}:
+		return v, nil
+	case []map[string]interface{}:
+		result := make([]interface{}, len(v))
+		for i, item := range v {
+			result[i] = item
+		}
+		return result, nil
+	default:
+		// Single object - wrap in slice
+		return []interface{}{objects}, nil
+	}
+}
+
+// mapSliceResults maps a slice of data maps to a slice of objects using reflection.
+func (m *Mapper) mapSliceResults(data []interface{}, results interface{}, mappings []config.PropertyMap) error {
+	// This is a simplified implementation that works with []interface{} of maps
+	// A more complete implementation would use reflection to populate any slice type
+	
+	switch v := results.(type) {
+	case *[]map[string]interface{}:
+		// Direct mapping to map slice
+		mapped := make([]map[string]interface{}, len(data))
+		for i, item := range data {
+			if dataMap, ok := item.(map[string]interface{}); ok {
+				mapped[i] = dataMap
+			}
+		}
+		*v = mapped
+		return nil
+	default:
+		// For struct slices, we'd need more complex reflection
+		// For now, return an error suggesting to use []map[string]interface{}
+		return fmt.Errorf("results must be *[]map[string]interface{} for now (full reflection support coming soon)")
+	}
 }

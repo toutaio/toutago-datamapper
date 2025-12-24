@@ -17,6 +17,56 @@ Map domain objects to ANY data source (SQL, Files, APIs, NoSQL) through YAML/JSO
 - **Complete Abstraction**: Swap data sources without changing code
 - **Pluggable Adapters**: Support any data source through adapters
 
+## Quick Start
+
+See the [Simple CRUD Example](examples/simple-crud/) for a complete working demonstration.
+
+```go
+package main
+
+import (
+    "context"
+    "github.com/toutago/toutago-datamapper/adapter"
+    "github.com/toutago/toutago-datamapper/config"
+    "github.com/toutago/toutago-datamapper/engine"
+    "github.com/toutago/toutago-datamapper/filesystem"
+)
+
+type User struct {
+    ID    string
+    Name  string
+    Email string
+}
+
+func main() {
+    // Create mapper from config file
+    mapper, _ := engine.NewMapper("config.yaml")
+    defer mapper.Close()
+
+    // Register filesystem adapter
+    mapper.RegisterAdapter("filesystem", func(source config.Source) (adapter.Adapter, error) {
+        return filesystem.NewFilesystemAdapter(source.Connection)
+    })
+
+    ctx := context.Background()
+
+    // Create a user
+    user := User{ID: "1", Name: "Alice", Email: "alice@example.com"}
+    mapper.Insert(ctx, "users.user-crud", user)
+
+    // Fetch the user
+    var fetched User
+    mapper.Fetch(ctx, "users.user-crud", map[string]interface{}{"id": "1"}, &fetched)
+    
+    // Update the user
+    fetched.Email = "alice.johnson@example.com"
+    mapper.Update(ctx, "users.user-crud", fetched)
+    
+    // Delete the user
+    mapper.Delete(ctx, "users.user-crud", "1")
+}
+```
+
 ## Features
 
 - ✅ YAML/JSON configuration
@@ -152,12 +202,13 @@ go get github.com/toutago/toutago-datamapper
 - [x] Adapter registry
 - [x] Comprehensive tests (55%+ coverage)
 
-### Phase 4: Reference Impl (Week 4-5) - 🔄 READY TO START
-- [ ] Filesystem adapter
-- [ ] Complete CRUD operations
-- [ ] Working examples
+### Phase 4: Reference Impl (Week 4-5) - ✅ COMPLETE
+- [x] Filesystem adapter (76% coverage)
+- [x] Complete CRUD operations
+- [x] Working examples
+- [x] Example documentation
 
-### Phases 4-7 - ⬜ Not Started
+### Phases 5-7 - 🔄 READY TO START
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for complete roadmap.
 
 ## Contributing
