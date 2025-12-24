@@ -1,0 +1,119 @@
+namespace: orders
+version: "1.0"
+
+sources:
+  orderdb:
+    adapter: filesystem
+    connection: "./data"
+    options:
+      format: json
+
+mappings:
+  # Bulk operations mapping
+  order-bulk:
+    object: Order
+    source: orderdb
+    operations:
+      # Bulk insert
+      insert:
+        statement: "orders/{id}.json"
+        bulk: true
+        parameters:
+          - object: ID
+            field: id
+        properties:
+          - object: ID
+            field: id
+          - object: CustomerID
+            field: customer_id
+          - object: Total
+            field: total
+          - object: Status
+            field: status
+          - object: Items
+            field: items
+            type: json
+          - object: CreatedAt
+            field: created_at
+            type: timestamp
+
+      # Bulk update
+      update:
+        statement: "orders/{id}.json"
+        bulk: true
+        parameters:
+          - object: ID
+            field: id
+        properties:
+          - object: ID
+            field: id
+          - object: CustomerID
+            field: customer_id
+          - object: Total
+            field: total
+          - object: Status
+            field: status
+          - object: Items
+            field: items
+            type: json
+          - object: CreatedAt
+            field: created_at
+            type: timestamp
+
+      # Bulk delete
+      delete:
+        statement: "orders/{id}.json"
+        bulk: true
+        parameters:
+          - object: ID
+            field: id
+
+      # Fetch single order
+      fetch:
+        statement: "orders/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+        result:
+          type: Order
+          properties:
+            - object: ID
+              field: id
+            - object: CustomerID
+              field: customer_id
+            - object: Total
+              field: total
+            - object: Status
+              field: status
+            - object: Items
+              field: items
+              type: json
+            - object: CreatedAt
+              field: created_at
+              type: timestamp
+
+  # List all orders
+  order-list:
+    object: Order
+    source: orderdb
+    actions:
+      list:
+        statement: "orders/*.json"
+        result:
+          type: Order
+          multi: true
+          properties:
+            - object: ID
+              field: id
+            - object: CustomerID
+              field: customer_id
+            - object: Total
+              field: total
+            - object: Status
+              field: status
+            - object: Items
+              field: items
+              type: json
+            - object: CreatedAt
+              field: created_at
+              type: timestamp

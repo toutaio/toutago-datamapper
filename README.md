@@ -19,7 +19,7 @@ Map domain objects to ANY data source (SQL, Files, APIs, NoSQL) through YAML/JSO
 
 ## Quick Start
 
-See the [Simple CRUD Example](examples/simple-crud/) for a complete working demonstration.
+See the [examples directory](examples/) for complete working demonstrations.
 
 ```go
 package main
@@ -153,6 +153,14 @@ go get github.com/toutago/toutago-datamapper
 - [Credential Management](openspec/changes/add-mapper-configuration/CREDENTIALS.md) - Security best practices
 - [Examples](openspec/changes/add-mapper-configuration/EXAMPLES.md) - Configuration examples
 
+## Examples
+
+- [Simple CRUD](examples/simple-crud/) - Basic create, read, update, delete operations
+- [Multi-Source CQRS](examples/multi-source/) - Multiple data sources with read/write separation
+- [Bulk Operations](examples/bulk-operations/) - High-performance batch processing
+- [Credentials Management](examples/credentials/) - Secure credential handling
+- [Custom Actions](examples/custom-actions/) - Stored procedures and complex queries
+
 ## Architecture
 
 ```
@@ -208,7 +216,16 @@ go get github.com/toutago/toutago-datamapper
 - [x] Working examples
 - [x] Example documentation
 
-### Phases 5-7 - 🔄 READY TO START
+### Phase 5: Examples & Documentation (Week 5-6) - ✅ COMPLETE
+- [x] Simple CRUD example
+- [x] Multi-source CQRS example
+- [x] Bulk operations example
+- [x] Credentials management example
+- [x] Custom actions example
+- [x] Comprehensive README files
+- [x] Usage patterns documentation
+
+### Phases 6-7 - 🔄 READY TO START
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for complete roadmap.
 
 ## Contributing

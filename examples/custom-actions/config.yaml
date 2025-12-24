@@ -1,0 +1,234 @@
+namespace: transactions
+version: "1.0"
+
+sources:
+  transactiondb:
+    adapter: filesystem
+    connection: "./data"
+    options:
+      format: json
+
+mappings:
+  # Standard CRUD operations
+  transaction-crud:
+    object: Transaction
+    source: transactiondb
+    operations:
+      insert:
+        statement: "transactions/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+        properties:
+          - object: ID
+            field: id
+          - object: AccountID
+            field: account_id
+          - object: Amount
+            field: amount
+          - object: Type
+            field: type
+          - object: Description
+            field: description
+          - object: Balance
+            field: balance
+
+      fetch:
+        statement: "transactions/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+        result:
+          type: Transaction
+          properties:
+            - object: ID
+              field: id
+            - object: AccountID
+              field: account_id
+            - object: Amount
+              field: amount
+            - object: Type
+              field: type
+            - object: Description
+              field: description
+            - object: Balance
+              field: balance
+
+      delete:
+        statement: "transactions/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+
+  # Custom Actions
+  list-all:
+    description: "List all transactions"
+    source: transactiondb
+    actions:
+      execute:
+        statement: "transactions/*.json"
+        result:
+          type: Transaction
+          multi: true
+          properties:
+            - object: ID
+              field: id
+            - object: AccountID
+              field: account_id
+            - object: Amount
+              field: amount
+            - object: Type
+              field: type
+            - object: Description
+              field: description
+            - object: Balance
+              field: balance
+
+  by-account:
+    description: "Get transactions by account ID"
+    source: transactiondb
+    actions:
+      execute:
+        statement: "transactions/*.json"
+        parameters:
+          - name: account_id
+            type: string
+        filters:
+          - field: account_id
+            operator: equals
+            parameter: account_id
+        result:
+          type: Transaction
+          multi: true
+          properties:
+            - object: ID
+              field: id
+            - object: AccountID
+              field: account_id
+            - object: Amount
+              field: amount
+            - object: Type
+              field: type
+            - object: Description
+              field: description
+            - object: Balance
+              field: balance
+
+  account-summary:
+    description: "Calculate account summary with aggregations"
+    source: transactiondb
+    actions:
+      execute:
+        statement: "transactions/*.json"
+        parameters:
+          - name: account_id
+            type: string
+        filters:
+          - field: account_id
+            operator: equals
+            parameter: account_id
+        aggregations:
+          - function: sum
+            field: amount
+            alias: total_credits
+            filter:
+              field: type
+              value: credit
+          - function: sum
+            field: amount
+            alias: total_debits
+            filter:
+              field: type
+              value: debit
+          - function: count
+            field: id
+            alias: transaction_count
+          - function: last
+            field: balance
+            alias: current_balance
+        result:
+          type: map
+          properties:
+            - field: total_credits
+            - field: total_debits
+            - field: transaction_count
+            - field: current_balance
+
+  recent:
+    description: "Get most recent transactions"
+    source: transactiondb
+    actions:
+      execute:
+        statement: "transactions/*.json"
+        parameters:
+          - name: limit
+            type: int
+            default: 10
+        sort:
+          - field: id
+            direction: desc
+        limit: "{limit}"
+        result:
+          type: Transaction
+          multi: true
+          properties:
+            - object: ID
+              field: id
+            - object: AccountID
+              field: account_id
+            - object: Amount
+              field: amount
+            - object: Type
+              field: type
+            - object: Description
+              field: description
+            - object: Balance
+              field: balance
+
+  by-type:
+    description: "Get transactions by type (credit/debit)"
+    source: transactiondb
+    actions:
+      execute:
+        statement: "transactions/*.json"
+        parameters:
+          - name: type
+            type: string
+        filters:
+          - field: type
+            operator: equals
+            parameter: type
+        result:
+          type: Transaction
+          multi: true
+          properties:
+            - object: ID
+              field: id
+            - object: AccountID
+              field: account_id
+            - object: Amount
+              field: amount
+            - object: Type
+              field: type
+            - object: Description
+              field: description
+            - object: Balance
+              field: balance
+
+  reconcile-balance:
+    description: "Reconcile account balance (stored procedure simulation)"
+    source: transactiondb
+    actions:
+      execute:
+        statement: "CALL reconcile_account_balance({account_id})"
+        type: procedure
+        parameters:
+          - name: account_id
+            type: string
+        result:
+          type: map
+          properties:
+            - field: expected_balance
+            - field: actual_balance
+            - field: status
+            - field: discrepancy

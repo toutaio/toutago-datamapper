@@ -1,0 +1,181 @@
+namespace: products
+version: "1.0"
+
+# Multiple sources for CQRS pattern
+sources:
+  # Primary storage - source of truth
+  primary:
+    adapter: filesystem
+    connection: "./data/primary"
+    options:
+      format: json
+
+  # Cache storage - fast reads
+  cache:
+    adapter: filesystem
+    connection: "./data/cache"
+    options:
+      format: json
+
+# Mappings demonstrate CQRS pattern
+mappings:
+  # Write operations - always go to primary
+  product-write:
+    object: Product
+    source: primary
+    operations:
+      insert:
+        statement: "products/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+          - object: Description
+            field: description
+          - object: Price
+            field: price
+          - object: Stock
+            field: stock
+          - object: UpdatedAt
+            field: updated_at
+            type: timestamp
+
+      update:
+        statement: "products/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+          - object: Description
+            field: description
+          - object: Price
+            field: price
+          - object: Stock
+            field: stock
+          - object: UpdatedAt
+            field: updated_at
+            type: timestamp
+
+      delete:
+        statement: "products/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+
+  # Read from cache - fast but may be stale
+  product-read-cache:
+    object: Product
+    source: cache
+    operations:
+      fetch:
+        statement: "products/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+        result:
+          type: Product
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+            - object: Description
+              field: description
+            - object: Price
+              field: price
+            - object: Stock
+              field: stock
+            - object: UpdatedAt
+              field: updated_at
+              type: timestamp
+
+  # Read from primary - always fresh
+  product-read-primary:
+    object: Product
+    source: primary
+    operations:
+      fetch:
+        statement: "products/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+        result:
+          type: Product
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+            - object: Description
+              field: description
+            - object: Price
+              field: price
+            - object: Stock
+              field: stock
+            - object: UpdatedAt
+              field: updated_at
+              type: timestamp
+
+  # Cache management operations
+  product-cache:
+    object: Product
+    source: cache
+    operations:
+      insert:
+        statement: "products/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+          - object: Description
+            field: description
+          - object: Price
+            field: price
+          - object: Stock
+            field: stock
+          - object: UpdatedAt
+            field: updated_at
+            type: timestamp
+
+      delete:
+        statement: "products/{id}.json"
+        parameters:
+          - object: ID
+            field: id
+
+  # List all products
+  product-list:
+    object: Product
+    source: primary
+    actions:
+      list:
+        statement: "products/*.json"
+        result:
+          type: Product
+          multi: true
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+            - object: Description
+              field: description
+            - object: Price
+              field: price
+            - object: Stock
+              field: stock
+            - object: UpdatedAt
+              field: updated_at
+              type: timestamp
