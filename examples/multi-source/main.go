@@ -6,10 +6,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/toutago/toutago-datamapper/adapter"
-	"github.com/toutago/toutago-datamapper/config"
-	"github.com/toutago/toutago-datamapper/engine"
-	"github.com/toutago/toutago-datamapper/filesystem"
+	"github.com/toutaio/toutago-datamapper/adapter"
+	"github.com/toutaio/toutago-datamapper/config"
+	"github.com/toutaio/toutago-datamapper/engine"
+	"github.com/toutaio/toutago-datamapper/filesystem"
 )
 
 // Product represents our domain object

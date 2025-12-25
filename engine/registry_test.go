@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/toutago/toutago-datamapper/adapter"
-	"github.com/toutago/toutago-datamapper/config"
+	"github.com/toutaio/toutago-datamapper/adapter"
+	"github.com/toutaio/toutago-datamapper/config"
 )
 
 // MockAdapter is a mock adapter for testing

@@ -1,0 +1,205 @@
+namespace: mysql-example
+version: "1.0"
+
+sources:
+  mysql-db:
+    adapter: mysql
+    connection: "${DB_CONNECTION}"
+    options:
+      host: "${DB_HOST:-localhost}"
+      port: ${DB_PORT:-3306}
+      user: "${DB_USER:-root}"
+      password: "${DB_PASSWORD}"
+      database: "${DB_NAME:-testdb}"
+      ssl: "${DB_SSL:-false}"
+      max_connections: 10
+      max_idle: 5
+
+mappings:
+  users:
+    object: User
+    source: mysql-db
+    
+    operations:
+      insert:
+        statement: "users"
+        properties:
+          - object: Name
+            field: name
+          - object: Email
+            field: email
+          - object: Version
+            field: version
+        generated:
+          - object: ID
+            field: id
+      
+      fetch:
+        statement: "SELECT id, name, email, created_at, updated_at, version FROM users WHERE id = {id}"
+        result:
+          type: User
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+            - object: Email
+              field: email
+            - object: CreatedAt
+              field: created_at
+            - object: UpdatedAt
+              field: updated_at
+            - object: Version
+              field: version
+      
+      update:
+        statement: "users"
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+          - object: Email
+            field: email
+          - object: Version
+            field: version
+        identifier:
+          - object: ID
+            field: id
+      
+      update-versioned:
+        statement: "users"
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+          - object: Email
+            field: email
+          - object: Version
+            field: version
+        identifier:
+          - object: ID
+            field: id
+        condition:
+          - object: Version
+            field: version
+      
+      delete:
+        statement: "users"
+        identifier:
+          - object: ID
+            field: id
+    
+    actions:
+      count:
+        statement: "SELECT COUNT(*) as count FROM users"
+        result:
+          type: map
+          multi: true
+      
+      search-by-email:
+        statement: "SELECT id, name, email, created_at FROM users WHERE email LIKE {pattern}"
+        parameters:
+          - object: pattern
+            field: pattern
+            type: string
+        result:
+          type: map
+          multi: true
+
+  products:
+    object: Product
+    source: mysql-db
+    
+    operations:
+      insert:
+        statement: "products"
+        properties:
+          - object: Name
+            field: name
+          - object: Description
+            field: description
+          - object: Price
+            field: price
+          - object: Stock
+            field: stock
+        generated:
+          - object: ID
+            field: id
+      
+      bulk-insert:
+        statement: "products"
+        bulk: true
+        properties:
+          - object: Name
+            field: name
+          - object: Description
+            field: description
+          - object: Price
+            field: price
+          - object: Stock
+            field: stock
+        generated:
+          - object: ID
+            field: id
+      
+      fetch:
+        statement: "SELECT id, name, description, price, stock, created_at FROM products WHERE id = {id}"
+        result:
+          type: Product
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+            - object: Description
+              field: description
+            - object: Price
+              field: price
+            - object: Stock
+              field: stock
+            - object: CreatedAt
+              field: created_at
+      
+      fetch-all:
+        statement: "SELECT id, name, description, price, stock, created_at FROM products ORDER BY name"
+        result:
+          type: Product
+          multi: true
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+            - object: Description
+              field: description
+            - object: Price
+              field: price
+            - object: Stock
+              field: stock
+            - object: CreatedAt
+              field: created_at
+      
+      update:
+        statement: "products"
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+          - object: Description
+            field: description
+          - object: Price
+            field: price
+          - object: Stock
+            field: stock
+        identifier:
+          - object: ID
+            field: id
+      
+      delete:
+        statement: "products"
+        identifier:
+          - object: ID
+            field: id

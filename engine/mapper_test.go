@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/toutago/toutago-datamapper/adapter"
-	"github.com/toutago/toutago-datamapper/config"
+	"github.com/toutaio/toutago-datamapper/adapter"
+	"github.com/toutaio/toutago-datamapper/config"
 )
 
 func TestNewMapper(t *testing.T) {

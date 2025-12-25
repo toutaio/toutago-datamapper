@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/toutago/toutago-datamapper/adapter"
-	"github.com/toutago/toutago-datamapper/config"
+	"github.com/toutaio/toutago-datamapper/adapter"
+	"github.com/toutaio/toutago-datamapper/config"
 )
 
 // Mapper is the main orchestration engine that coordinates configuration,

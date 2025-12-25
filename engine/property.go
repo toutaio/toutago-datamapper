@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/toutago/toutago-datamapper/config"
+	"github.com/toutaio/toutago-datamapper/config"
 )
 
 // PropertyMapper handles mapping between data fields and object properties using reflection.

@@ -26,10 +26,10 @@ package main
 
 import (
     "context"
-    "github.com/toutago/toutago-datamapper/adapter"
-    "github.com/toutago/toutago-datamapper/config"
-    "github.com/toutago/toutago-datamapper/engine"
-    "github.com/toutago/toutago-datamapper/filesystem"
+    "github.com/toutaio/toutago-datamapper/adapter"
+    "github.com/toutaio/toutago-datamapper/config"
+    "github.com/toutaio/toutago-datamapper/engine"
+    "github.com/toutaio/toutago-datamapper/filesystem"
 )
 
 type User struct {
@@ -116,7 +116,7 @@ package main
 
 import (
     "context"
-    "github.com/toutago/toutago-datamapper/engine"
+    "github.com/toutaio/toutago-datamapper/engine"
 )
 
 type User struct {
@@ -141,8 +141,26 @@ func main() {
 ## Installation
 
 ```bash
-go get github.com/toutago/toutago-datamapper
+go get github.com/toutaio/toutago-datamapper
 ```
+
+### Available Adapters
+
+The core library is database-agnostic. Install adapters separately based on your needs:
+
+#### Official Adapters
+
+- **MySQL**: `go get github.com/toutaio/toutago-datamapper-mysql`
+- **Filesystem**: Built-in (included in core library)
+
+#### Coming Soon
+
+- PostgreSQL
+- Redis
+- MongoDB
+- REST APIs
+
+See each adapter's repository for specific documentation and examples.
 
 ## Documentation
 

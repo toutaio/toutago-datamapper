@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/toutago/toutago-datamapper/adapter"
+	"github.com/toutaio/toutago-datamapper/adapter"
 )
 
 func TestNewFilesystemAdapter(t *testing.T) {

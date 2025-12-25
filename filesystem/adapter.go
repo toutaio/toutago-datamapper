@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/toutago/toutago-datamapper/adapter"
+	"github.com/toutaio/toutago-datamapper/adapter"
 )
 
 // FilesystemAdapter implements the adapter.Adapter interface for filesystem storage.

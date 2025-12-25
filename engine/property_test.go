@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/toutago/toutago-datamapper/config"
+	"github.com/toutaio/toutago-datamapper/config"
 )
 
 // Test structs

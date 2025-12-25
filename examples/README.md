@@ -129,7 +129,7 @@ Beyond CRUD operations:
 
 ```bash
 # Clone the repository
-git clone https://github.com/toutago/toutago-datamapper.git
+git clone https://github.com/toutaio/toutago-datamapper.git
 cd toutago-datamapper/examples
 
 # Run simple CRUD
@@ -438,7 +438,7 @@ A: Use bulk operations to migrate data between sources.
 ## 📞 Getting Help
 
 - **Documentation**: See [docs](../openspec/)
-- **Issues**: [GitHub Issues](https://github.com/toutago/toutago-datamapper/issues)
+- **Issues**: [GitHub Issues](https://github.com/toutaio/toutago-datamapper/issues)
 - **Examples Not Working?**: Check Go version (requires 1.21+)
 
 ---
