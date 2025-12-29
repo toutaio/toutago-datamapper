@@ -186,15 +186,15 @@ mappings:
 	})
 
 	ctx := context.Background()
-	
+
 	type User struct {
 		ID   int
 		Name string
 	}
-	
+
 	var user User
 	err = mapper.Fetch(ctx, "test.user", map[string]interface{}{"ID": 1}, &user)
-	
+
 	// This will fail because MockAdapter returns empty results
 	// We expect ErrNotFound
 	if err != adapter.ErrNotFound {

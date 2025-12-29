@@ -11,11 +11,11 @@ import (
 
 // MockAdapter is a mock adapter for testing
 type MockAdapter struct {
-	name        string
-	connected   bool
-	closed      bool
-	connectErr  error
-	closeErr    error
+	name       string
+	connected  bool
+	closed     bool
+	connectErr error
+	closeErr   error
 }
 
 func NewMockAdapter(name string) *MockAdapter {
@@ -187,7 +187,7 @@ func TestAdapterRegistry_Close(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	
+
 	// Create multiple instances
 	_, _ = registry.GetAdapter(ctx, source, "source1")
 	_, _ = registry.GetAdapter(ctx, source, "source2")
@@ -259,7 +259,7 @@ func TestAdapterRegistry_GetInstance(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	
+
 	// No instance yet
 	_, exists := registry.GetInstance("source1")
 	if exists {

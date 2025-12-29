@@ -8,10 +8,10 @@ import (
 
 func TestCredentialResolver_EnvVars(t *testing.T) {
 	cr := NewCredentialResolver()
-	
+
 	// Set test env var
 	cr.SetEnvVar("TEST_VAR", "test_value")
-	
+
 	value, exists := cr.GetEnvVar("TEST_VAR")
 	if !exists {
 		t.Error("TEST_VAR should exist")
@@ -25,7 +25,7 @@ func TestCredentialResolver_ResolveSimple(t *testing.T) {
 	cr := NewCredentialResolver()
 	cr.SetEnvVar("DB_HOST", "localhost")
 	cr.SetEnvVar("DB_PORT", "3306")
-	
+
 	tests := []struct {
 		name  string
 		input string
@@ -52,7 +52,7 @@ func TestCredentialResolver_ResolveSimple(t *testing.T) {
 			want:  "static-string",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := cr.Resolve(tt.input)
@@ -71,7 +71,7 @@ func TestCredentialResolver_ResolveWithDefaults(t *testing.T) {
 	cr := NewCredentialResolver()
 	cr.SetEnvVar("DB_HOST", "localhost")
 	// DB_PORT is not set
-	
+
 	tests := []struct {
 		name    string
 		input   string
@@ -103,7 +103,7 @@ func TestCredentialResolver_ResolveWithDefaults(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := cr.Resolve(tt.input)
@@ -123,12 +123,12 @@ func TestCredentialResolver_ResolveCredentialsRef(t *testing.T) {
 	cr.credentials["main-db"] = CredentialSource{
 		Connection: "user:pass@tcp(host:3306)/db",
 	}
-	
+
 	got, err := cr.Resolve("@credentials:main-db")
 	if err != nil {
 		t.Errorf("Resolve() error = %v", err)
 	}
-	
+
 	want := "user:pass@tcp(host:3306)/db"
 	if got != want {
 		t.Errorf("Resolve() = %v, want %v", got, want)
@@ -139,7 +139,7 @@ func TestCredentialResolver_LoadEnvFile(t *testing.T) {
 	// Create temporary .env file
 	tmpDir := t.TempDir()
 	envFile := filepath.Join(tmpDir, ".env")
-	
+
 	content := `# Test env file
 DB_HOST=localhost
 DB_PORT=3306
@@ -147,16 +147,16 @@ DB_USER=testuser
 # Comment line
 DB_PASSWORD="secret123"
 `
-	
+
 	if err := os.WriteFile(envFile, []byte(content), 0644); err != nil {
 		t.Fatalf("Failed to create test env file: %v", err)
 	}
-	
+
 	cr := NewCredentialResolver()
 	if err := cr.LoadEnvFile(envFile); err != nil {
 		t.Fatalf("LoadEnvFile() error = %v", err)
 	}
-	
+
 	// Check loaded variables
 	tests := []struct {
 		name  string
@@ -167,7 +167,7 @@ DB_PASSWORD="secret123"
 		{"DB_USER", "testuser"},
 		{"DB_PASSWORD", "secret123"},
 	}
-	
+
 	for _, tt := range tests {
 		got, exists := cr.GetEnvVar(tt.name)
 		if !exists {
@@ -183,7 +183,7 @@ func TestCredentialResolver_LoadCredentialsFile(t *testing.T) {
 	// Create temporary credentials file
 	tmpDir := t.TempDir()
 	credsFile := filepath.Join(tmpDir, "credentials.yaml")
-	
+
 	content := `credentials:
   main-db:
     connection: "user:pass@tcp(host:3306)/db"
@@ -192,21 +192,21 @@ func TestCredentialResolver_LoadCredentialsFile(t *testing.T) {
   cache:
     connection: "redis://localhost:6379"
 `
-	
+
 	if err := os.WriteFile(credsFile, []byte(content), 0644); err != nil {
 		t.Fatalf("Failed to create test credentials file: %v", err)
 	}
-	
+
 	cr := NewCredentialResolver()
 	if err := cr.LoadCredentialsFile(credsFile); err != nil {
 		t.Fatalf("LoadCredentialsFile() error = %v", err)
 	}
-	
+
 	// Check loaded credentials
 	if len(cr.credentials) != 2 {
 		t.Errorf("Should have 2 credentials, got %d", len(cr.credentials))
 	}
-	
+
 	mainDB, exists := cr.credentials["main-db"]
 	if !exists {
 		t.Error("main-db credential should exist")
@@ -218,7 +218,7 @@ func TestCredentialResolver_LoadCredentialsFile(t *testing.T) {
 
 func TestCredentialResolver_Sanitize(t *testing.T) {
 	cr := NewCredentialResolver()
-	
+
 	tests := []struct {
 		name  string
 		input string
@@ -245,7 +245,7 @@ func TestCredentialResolver_Sanitize(t *testing.T) {
 			want:  "SELECT * FROM users",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := cr.Sanitize(tt.input)

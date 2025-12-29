@@ -438,7 +438,7 @@ func (m *Mapper) toSlice(objects interface{}) ([]interface{}, error) {
 func (m *Mapper) mapSliceResults(data []interface{}, results interface{}, mappings []config.PropertyMap) error {
 	// This is a simplified implementation that works with []interface{} of maps
 	// A more complete implementation would use reflection to populate any slice type
-	
+
 	switch v := results.(type) {
 	case *[]map[string]interface{}:
 		// Direct mapping to map slice

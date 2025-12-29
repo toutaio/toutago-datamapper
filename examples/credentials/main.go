@@ -54,7 +54,7 @@ func main() {
 
 	// 2. Use the mapper - credentials are hidden
 	fmt.Println("2. Performing operations with secure credentials...")
-	
+
 	account := Account{
 		ID:       "acc-001",
 		Username: "admin",
@@ -113,7 +113,7 @@ func checkEnvironment() {
 	}
 
 	fmt.Println("Checking environment variables...")
-	
+
 	allSet := true
 	for _, envVar := range required {
 		value := os.Getenv(envVar)
@@ -146,7 +146,7 @@ func checkEnvironment() {
 		fmt.Println("Or use the provided .env file:")
 		fmt.Println("  source .env")
 		fmt.Println()
-		
+
 		// Set defaults for demo
 		if os.Getenv("DB_PATH") == "" {
 			os.Setenv("DB_PATH", "./data")
@@ -154,7 +154,7 @@ func checkEnvironment() {
 		if os.Getenv("DB_FORMAT") == "" {
 			os.Setenv("DB_FORMAT", "json")
 		}
-		
+
 		fmt.Println("Using default values for demonstration...")
 		fmt.Println()
 	}

@@ -50,13 +50,13 @@ func main() {
 	// 1. Bulk Insert - Create many orders at once
 	fmt.Println("1. Bulk Insert: Creating 100 orders...")
 	orders := generateOrders(100)
-	
+
 	start := time.Now()
 	if err := mapper.Insert(ctx, "orders.order-bulk", orders); err != nil {
 		log.Fatalf("Bulk insert failed: %v", err)
 	}
 	elapsed := time.Since(start)
-	
+
 	fmt.Printf("   ✓ Created 100 orders in %v\n", elapsed)
 	fmt.Printf("   ✓ Average: %v per order\n", elapsed/100)
 	fmt.Println()
@@ -64,16 +64,16 @@ func main() {
 	// 2. Bulk Read - Fetch all orders
 	fmt.Println("2. Bulk Read: Fetching all orders...")
 	var allOrders []Order
-	
+
 	start = time.Now()
 	err = mapper.FetchMulti(ctx, "orders.order-list", nil, &allOrders)
 	elapsed = time.Since(start)
-	
+
 	if err != nil {
 		log.Printf("Error: %v", err)
 	} else {
 		fmt.Printf("   ✓ Fetched %d orders in %v\n", len(allOrders), elapsed)
-		
+
 		// Calculate statistics
 		var totalRevenue float64
 		statusCount := make(map[string]int)
@@ -81,7 +81,7 @@ func main() {
 			totalRevenue += order.Total
 			statusCount[order.Status]++
 		}
-		
+
 		fmt.Printf("\n   Statistics:\n")
 		fmt.Printf("   • Total Revenue: $%.2f\n", totalRevenue)
 		fmt.Printf("   • Order Status:\n")
@@ -93,7 +93,7 @@ func main() {
 
 	// 3. Bulk Update - Update multiple orders
 	fmt.Println("3. Bulk Update: Processing pending orders...")
-	
+
 	// Update first 20 orders to "processing"
 	var ordersToUpdate []Order
 	for i := 0; i < 20 && i < len(allOrders); i++ {
@@ -102,7 +102,7 @@ func main() {
 			ordersToUpdate = append(ordersToUpdate, allOrders[i])
 		}
 	}
-	
+
 	start = time.Now()
 	if err := mapper.Update(ctx, "orders.order-bulk", ordersToUpdate); err != nil {
 		log.Printf("Bulk update failed: %v", err)
@@ -115,7 +115,7 @@ func main() {
 	// 4. Filtered Read - Fetch by status
 	fmt.Println("4. Filtered Read: Fetching completed orders...")
 	var completedOrders []Order
-	
+
 	// Note: This is a simple example. Real implementation would filter in adapter
 	err = mapper.FetchMulti(ctx, "orders.order-list", nil, &completedOrders)
 	if err != nil {
@@ -134,7 +134,7 @@ func main() {
 
 	// 5. Bulk Delete - Cancel old pending orders
 	fmt.Println("5. Bulk Delete: Canceling old pending orders...")
-	
+
 	// Find orders to cancel (first 10 pending)
 	var idsToDelete []string
 	count := 0
@@ -144,7 +144,7 @@ func main() {
 			count++
 		}
 	}
-	
+
 	start = time.Now()
 	if err := mapper.Delete(ctx, "orders.order-bulk", idsToDelete); err != nil {
 		log.Printf("Bulk delete failed: %v", err)
@@ -180,7 +180,7 @@ func main() {
 func generateOrders(count int) []Order {
 	orders := make([]Order, count)
 	statuses := []string{"pending", "processing", "completed", "cancelled"}
-	
+
 	for i := 0; i < count; i++ {
 		orders[i] = Order{
 			ID:         fmt.Sprintf("ord-%03d", i+1),
@@ -197,6 +197,6 @@ func generateOrders(count int) []Order {
 			CreatedAt: time.Now().Add(time.Duration(-i) * time.Hour),
 		}
 	}
-	
+
 	return orders
 }

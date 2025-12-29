@@ -23,11 +23,11 @@ type Transaction struct {
 
 // AccountSummary is a computed result
 type AccountSummary struct {
-	AccountID      string
-	TotalDebits    float64
-	TotalCredits   float64
+	AccountID        string
+	TotalDebits      float64
+	TotalCredits     float64
 	TransactionCount int
-	CurrentBalance float64
+	CurrentBalance   float64
 }
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 		{ID: "txn-003", AccountID: "acc-100", Amount: 200.00, Type: "credit", Description: "Salary payment", Balance: 1150.00},
 		{ID: "txn-004", AccountID: "acc-100", Amount: 75.50, Type: "debit", Description: "Grocery shopping", Balance: 1074.50},
 		{ID: "txn-005", AccountID: "acc-100", Amount: 30.00, Type: "debit", Description: "Restaurant", Balance: 1044.50},
-		
+
 		{ID: "txn-006", AccountID: "acc-101", Amount: 500.00, Type: "credit", Description: "Initial deposit", Balance: 500.00},
 		{ID: "txn-007", AccountID: "acc-101", Amount: 100.00, Type: "debit", Description: "Online purchase", Balance: 400.00},
 		{ID: "txn-008", AccountID: "acc-101", Amount: 250.00, Type: "credit", Description: "Freelance payment", Balance: 650.00},
@@ -93,7 +93,7 @@ func main() {
 		fmt.Printf("   ✓ Found %d transactions for acc-100\n", len(accountTxns))
 		for i, txn := range accountTxns {
 			t := txn.(map[string]interface{})
-			fmt.Printf("      %d. %s - %s $%.2f (Balance: $%.2f)\n", 
+			fmt.Printf("      %d. %s - %s $%.2f (Balance: $%.2f)\n",
 				i+1, t["type"], t["description"], t["amount"], t["balance"])
 		}
 	}
@@ -128,7 +128,7 @@ func main() {
 		fmt.Printf("   ✓ Recent transactions:\n")
 		for i, txn := range recentTxns {
 			t := txn.(map[string]interface{})
-			fmt.Printf("      %d. [%s] %s - $%.2f\n", 
+			fmt.Printf("      %d. [%s] %s - $%.2f\n",
 				i+1, t["account_id"], t["description"], t["amount"])
 		}
 	}

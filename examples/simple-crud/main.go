@@ -65,7 +65,7 @@ func main() {
 	if err := mapper.Fetch(ctx, "users.user-crud", map[string]interface{}{"id": "1"}, &fetchedUser); err != nil {
 		log.Printf("Failed to fetch user: %v", err)
 	} else {
-		fmt.Printf("   ✓ Found user: %s (%s) - Age: %d\n", 
+		fmt.Printf("   ✓ Found user: %s (%s) - Age: %d\n",
 			fetchedUser.Name, fetchedUser.Email, fetchedUser.Age)
 	}
 
@@ -103,7 +103,7 @@ func main() {
 	// Verify update
 	var verifyUser User
 	if err := mapper.Fetch(ctx, "users.user-crud", map[string]interface{}{"id": "2"}, &verifyUser); err == nil {
-		fmt.Printf("   ✓ Verified: %s (%s) - Age: %d\n", 
+		fmt.Printf("   ✓ Verified: %s (%s) - Age: %d\n",
 			verifyUser.Name, verifyUser.Email, verifyUser.Age)
 	}
 

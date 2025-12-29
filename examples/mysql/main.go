@@ -6,10 +6,10 @@ import (
 	"log"
 	"time"
 
+	mysql "github.com/toutaio/toutago-datamapper-mysql"
 	"github.com/toutaio/toutago-datamapper/adapter"
 	"github.com/toutaio/toutago-datamapper/config"
 	"github.com/toutaio/toutago-datamapper/engine"
-	mysql "github.com/toutaio/toutago-datamapper-mysql"
 )
 
 // User represents a domain object with zero database dependencies
@@ -198,7 +198,7 @@ func bulkOperations(ctx context.Context, mapper *engine.Mapper) error {
 		currentStock := int(prod["Stock"].(int64))
 		prod["Stock"] = currentStock - 10 // Simulate selling 10 units
 	}
-	
+
 	if err := mapper.Update(ctx, "products.update", allProducts); err != nil {
 		return fmt.Errorf("bulk update failed: %w", err)
 	}
@@ -244,7 +244,7 @@ func optimisticLocking(ctx context.Context, mapper *engine.Mapper) error {
 
 	// Simulate concurrent update scenario
 	fmt.Println("\nSimulating concurrent updates...")
-	
+
 	// First update (should succeed)
 	user1 := make(map[string]interface{})
 	for k, v := range fetchedUser {
@@ -306,7 +306,7 @@ func customActions(ctx context.Context, mapper *engine.Mapper) error {
 	if err != nil {
 		return fmt.Errorf("count action failed: %w", err)
 	}
-	
+
 	if len(countResult) > 0 {
 		if countMap, ok := countResult[0].(map[string]interface{}); ok {
 			fmt.Printf("✓ Total users in database: %v\n", countMap["count"])
@@ -322,7 +322,7 @@ func customActions(ctx context.Context, mapper *engine.Mapper) error {
 	if err != nil {
 		return fmt.Errorf("search action failed: %w", err)
 	}
-	
+
 	fmt.Printf("✓ Found %d users matching pattern\n", len(searchResults))
 	for i, r := range searchResults {
 		if userMap, ok := r.(map[string]interface{}); ok {

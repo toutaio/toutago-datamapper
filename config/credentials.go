@@ -119,14 +119,14 @@ func (cr *CredentialResolver) Resolve(value string) (string, error) {
 
 	// Handle environment variable placeholders
 	re := regexp.MustCompile(`\$\{([^}]+)\}`)
-	
+
 	result := value
 	matches := re.FindAllStringSubmatch(value, -1)
-	
+
 	for _, match := range matches {
-		placeholder := match[0]  // ${VAR_NAME} or ${VAR_NAME:-default}
-		varExpr := match[1]      // VAR_NAME or VAR_NAME:-default
-		
+		placeholder := match[0] // ${VAR_NAME} or ${VAR_NAME:-default}
+		varExpr := match[1]     // VAR_NAME or VAR_NAME:-default
+
 		// Check for default value syntax
 		var varName, defaultValue string
 		if strings.Contains(varExpr, ":-") {
@@ -136,7 +136,7 @@ func (cr *CredentialResolver) Resolve(value string) (string, error) {
 		} else {
 			varName = varExpr
 		}
-		
+
 		// Get value from environment
 		varValue, exists := cr.envVars[varName]
 		if !exists {
