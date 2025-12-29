@@ -490,3 +490,134 @@ func TestFilesystemAdapter_Concurrency(t *testing.T) {
 		t.Errorf("len(results) = %d, want 10", len(results))
 	}
 }
+
+func TestFilesystemAdapter_Name(t *testing.T) {
+	tmpDir := t.TempDir()
+	fa, err := NewFilesystemAdapter(tmpDir)
+	if err != nil {
+		t.Fatalf("NewFilesystemAdapter() error = %v", err)
+	}
+
+	name := fa.Name()
+	if name != "filesystem" {
+		t.Errorf("Name() = %v, want 'filesystem'", name)
+	}
+}
+
+func TestFilesystemAdapter_WriteAtomic_Errors(t *testing.T) {
+	tmpDir := t.TempDir()
+	fa, err := NewFilesystemAdapter(tmpDir)
+	if err != nil {
+		t.Fatalf("NewFilesystemAdapter() error = %v", err)
+	}
+
+	// Test writing to invalid directory
+	invalidPath := filepath.Join(tmpDir, "nonexistent", "deep", "path", "file.json")
+	data := []byte(`{"test": "data"}`)
+	
+	err = fa.writeAtomic(invalidPath, data)
+	if err == nil {
+		t.Error("writeAtomic() expected error for invalid path, got nil")
+	}
+}
+
+func TestFilesystemAdapter_FetchSingle_NotFound(t *testing.T) {
+	tmpDir := t.TempDir()
+	fa, err := NewFilesystemAdapter(tmpDir)
+	if err != nil {
+		t.Fatalf("NewFilesystemAdapter() error = %v", err)
+	}
+
+	ctx := context.Background()
+	op := &adapter.Operation{
+		Type:      adapter.OpFetch,
+		Statement: "nonexistent.json",
+		Multi:     false,
+	}
+
+	results, err := fa.Fetch(ctx, op, nil)
+	if err == nil {
+		t.Error("Fetch() expected error for non-existent file, got nil")
+	}
+	if len(results) != 0 {
+		t.Errorf("Fetch() returned %d results, want 0", len(results))
+	}
+}
+
+func TestFilesystemAdapter_FetchMulti_EmptyDir(t *testing.T) {
+	tmpDir := t.TempDir()
+	emptyDir := filepath.Join(tmpDir, "empty")
+	if err := os.MkdirAll(emptyDir, 0755); err != nil {
+		t.Fatalf("Failed to create empty dir: %v", err)
+	}
+
+	fa, err := NewFilesystemAdapter(tmpDir)
+	if err != nil {
+		t.Fatalf("NewFilesystemAdapter() error = %v", err)
+	}
+
+	ctx := context.Background()
+	op := &adapter.Operation{
+		Type:      adapter.OpFetch,
+		Statement: "empty/*.json",
+		Multi:     true,
+	}
+
+	results, err := fa.Fetch(ctx, op, nil)
+	if err != nil {
+		t.Errorf("Fetch() error = %v, want nil for empty directory", err)
+	}
+	if len(results) != 0 {
+		t.Errorf("Fetch() returned %d results, want 0 for empty directory", len(results))
+	}
+}
+
+func TestFilesystemAdapter_Execute_ListAction(t *testing.T) {
+	tmpDir := t.TempDir()
+	fa, err := NewFilesystemAdapter(tmpDir)
+	if err != nil {
+		t.Fatalf("NewFilesystemAdapter() error = %v", err)
+	}
+
+	// Create some test files
+	testData := map[string]interface{}{"id": "1", "name": "test1"}
+	filePath := filepath.Join(tmpDir, "item1.json")
+	jsonData, _ := json.Marshal(testData)
+	if err := os.WriteFile(filePath, jsonData, 0644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	ctx := context.Background()
+	action := &adapter.Action{
+		Name:      "list",
+		Statement: "*.json",
+	}
+
+	results, err := fa.Execute(ctx, action, nil)
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+
+	if results == nil {
+		t.Error("Execute() returned nil results")
+	}
+}
+
+func TestFilesystemAdapter_Execute_UnsupportedAction(t *testing.T) {
+	tmpDir := t.TempDir()
+	fa, err := NewFilesystemAdapter(tmpDir)
+	if err != nil {
+		t.Fatalf("NewFilesystemAdapter() error = %v", err)
+	}
+
+	ctx := context.Background()
+	action := &adapter.Action{
+		Name:      "unsupported",
+		Statement: "something",
+	}
+
+	_, err = fa.Execute(ctx, action, nil)
+	if err == nil {
+		t.Error("Execute() expected error for unsupported action, got nil")
+	}
+}

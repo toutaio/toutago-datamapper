@@ -366,3 +366,240 @@ DB_NAME=testdb
 		t.Errorf("Connection = %v, want %v", actualConn, expectedConn)
 	}
 }
+
+func TestParser_LoadCredentialsFile(t *testing.T) {
+	tmpDir := t.TempDir()
+	credsFile := filepath.Join(tmpDir, "creds.yaml")
+
+	content := `credentials:
+  db:
+    connection: "user:pass@localhost:3306/dbname"
+`
+	if err := os.WriteFile(credsFile, []byte(content), 0644); err != nil {
+		t.Fatalf("Failed to create credentials file: %v", err)
+	}
+
+	parser := NewParser()
+	if err := parser.LoadCredentialsFile(credsFile); err != nil {
+		t.Fatalf("LoadCredentialsFile() error = %v", err)
+	}
+
+	// Verify credentials were loaded by creating a config that uses them
+	configFile := filepath.Join(tmpDir, "config.yaml")
+	configContent := `namespace: test
+version: "1.0"
+sources:
+  main:
+    adapter: mysql
+    connection: "@credentials:db"
+mappings:
+  user:
+    object: User
+    source: main
+`
+	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to create config: %v", err)
+	}
+
+	if err := parser.LoadFile(configFile); err != nil {
+		t.Fatalf("LoadFile() error = %v", err)
+	}
+
+	cfg, err := parser.GetConfig("test")
+	if err != nil {
+		t.Fatalf("GetConfig() error = %v", err)
+	}
+
+	// The connection should be resolved from credentials
+	if cfg.Sources["main"].Connection != "user:pass@localhost:3306/dbname" {
+		t.Errorf("Connection = %v, want 'user:pass@localhost:3306/dbname'", cfg.Sources["main"].Connection)
+	}
+}
+
+func TestParser_Validate_NoConfigs(t *testing.T) {
+	parser := NewParser()
+	err := parser.Validate()
+	if err == nil {
+		t.Error("Validate() expected error for no configurations, got nil")
+	}
+	if err.Error() != "no configurations loaded" {
+		t.Errorf("Validate() error = %v, want 'no configurations loaded'", err)
+	}
+}
+
+func TestParser_GetAllNamespaces(t *testing.T) {
+	tmpDir := t.TempDir()
+	
+	// Create two config files with different namespaces
+	config1 := filepath.Join(tmpDir, "config1.yaml")
+	content1 := `namespace: users
+version: "1.0"
+sources:
+  db:
+    adapter: mysql
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db
+`
+	if err := os.WriteFile(config1, []byte(content1), 0644); err != nil {
+		t.Fatalf("Failed to create config1: %v", err)
+	}
+
+	config2 := filepath.Join(tmpDir, "config2.yaml")
+	content2 := `namespace: products
+version: "1.0"
+sources:
+  db:
+    adapter: mysql
+    connection: "localhost"
+mappings:
+  product:
+    object: Product
+    source: db
+`
+	if err := os.WriteFile(config2, []byte(content2), 0644); err != nil {
+		t.Fatalf("Failed to create config2: %v", err)
+	}
+
+	parser := NewParser()
+	if err := parser.LoadFile(config1); err != nil {
+		t.Fatalf("LoadFile(config1) error = %v", err)
+	}
+	if err := parser.LoadFile(config2); err != nil {
+		t.Fatalf("LoadFile(config2) error = %v", err)
+	}
+
+	namespaces := parser.GetAllNamespaces()
+	if len(namespaces) != 2 {
+		t.Errorf("GetAllNamespaces() returned %d namespaces, want 2", len(namespaces))
+	}
+
+	hasUsers := false
+	hasProducts := false
+	for _, ns := range namespaces {
+		if ns == "users" {
+			hasUsers = true
+		}
+		if ns == "products" {
+			hasProducts = true
+		}
+	}
+
+	if !hasUsers {
+		t.Error("GetAllNamespaces() missing 'users' namespace")
+	}
+	if !hasProducts {
+		t.Error("GetAllNamespaces() missing 'products' namespace")
+	}
+}
+
+func TestParser_ValidateSourceReferences_OperationSource(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	// Config with invalid operation source reference
+	content := `namespace: test
+version: "1.0"
+sources:
+  db1:
+    adapter: mysql
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db1
+    operations:
+      fetch:
+        source: nonexistent_source
+        statement: "SELECT * FROM users"
+`
+	if err := os.WriteFile(configFile, []byte(content), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	parser := NewParser()
+	if err := parser.LoadFile(configFile); err != nil {
+		t.Fatalf("LoadFile() error = %v", err)
+	}
+
+	err := parser.Validate()
+	if err == nil {
+		t.Error("Validate() expected error for invalid operation source, got nil")
+	}
+}
+
+func TestParser_ValidateSourceReferences_AfterAction(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	// Config with invalid after action source reference
+	content := `namespace: test
+version: "1.0"
+sources:
+  db1:
+    adapter: mysql
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db1
+    operations:
+      insert:
+        statement: "INSERT INTO users"
+        after:
+          - source: invalid_source
+            action: "notify"
+`
+	if err := os.WriteFile(configFile, []byte(content), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	parser := NewParser()
+	if err := parser.LoadFile(configFile); err != nil {
+		t.Fatalf("LoadFile() error = %v", err)
+	}
+
+	err := parser.Validate()
+	if err == nil {
+		t.Error("Validate() expected error for invalid after action source, got nil")
+	}
+}
+
+func TestParser_ValidateSourceReferences_FallbackChain(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	// Config with invalid source in fallback chain
+	content := `namespace: test
+version: "1.0"
+sources:
+  db1:
+    adapter: mysql
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db1
+    operations:
+      fetch:
+        statement: "SELECT * FROM users"
+        sources:
+          - name: invalid_db
+            statement: "SELECT * FROM users"
+`
+	if err := os.WriteFile(configFile, []byte(content), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	parser := NewParser()
+	if err := parser.LoadFile(configFile); err != nil {
+		t.Fatalf("LoadFile() error = %v", err)
+	}
+
+	err := parser.Validate()
+	if err == nil {
+		t.Error("Validate() expected error for invalid fallback chain source, got nil")
+	}
+}

@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -420,5 +421,167 @@ func TestPropertyMapper_ValidateMapping(t *testing.T) {
 				t.Errorf("ValidateMapping() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+func TestPropertyMapper_GetTimestamp(t *testing.T) {
+	pm := NewPropertyMapper()
+	now := time.Now()
+
+	type TestStruct struct {
+		CreatedAt time.Time
+	}
+
+	obj := TestStruct{CreatedAt: now}
+	
+	data, err := pm.MapFromObject(obj, []config.PropertyMap{
+		{Object: "CreatedAt", Field: "created_at", Type: "timestamp"},
+	})
+
+	if err != nil {
+		t.Fatalf("MapFromObject() error = %v", err)
+	}
+
+	if data["created_at"] == nil {
+		t.Error("Expected created_at to be set")
+	}
+
+	// Verify it's a valid timestamp string
+	timestampStr, ok := data["created_at"].(string)
+	if !ok {
+		t.Errorf("Expected created_at to be string, got %T", data["created_at"])
+	}
+
+	_, err = time.Parse(time.RFC3339, timestampStr)
+	if err != nil {
+		t.Errorf("Expected valid RFC3339 timestamp, got parse error: %v", err)
+	}
+}
+
+func TestPropertyMapper_GetJSON(t *testing.T) {
+	pm := NewPropertyMapper()
+
+	type Address struct {
+		Street string
+		City   string
+	}
+
+	type TestStruct struct {
+		Metadata Address
+	}
+
+	obj := TestStruct{
+		Metadata: Address{
+			Street: "123 Main St",
+			City:   "Springfield",
+		},
+	}
+	
+	data, err := pm.MapFromObject(obj, []config.PropertyMap{
+		{Object: "Metadata", Field: "metadata", Type: "json"},
+	})
+
+	if err != nil {
+		t.Fatalf("MapFromObject() error = %v", err)
+	}
+
+	if data["metadata"] == nil {
+		t.Error("Expected metadata to be set")
+	}
+
+	// Verify it's a JSON string
+	jsonStr, ok := data["metadata"].(string)
+	if !ok {
+		t.Errorf("Expected metadata to be string, got %T", data["metadata"])
+	}
+
+	// Verify it's valid JSON
+	var decoded Address
+	if err := json.Unmarshal([]byte(jsonStr), &decoded); err != nil {
+		t.Errorf("Expected valid JSON, got unmarshal error: %v", err)
+	}
+
+	if decoded.Street != "123 Main St" {
+		t.Errorf("Street = %v, want '123 Main St'", decoded.Street)
+	}
+}
+
+func TestPropertyMapper_SetDirect_PointerField(t *testing.T) {
+	pm := NewPropertyMapper()
+
+	type TestStruct struct {
+		Value *string
+	}
+
+	var obj TestStruct
+	data := map[string]interface{}{
+		"value": "hello",
+	}
+
+	err := pm.MapToObject(data, &obj, []config.PropertyMap{
+		{Object: "Value", Field: "value", Type: "direct"},
+	})
+
+	if err != nil {
+		t.Fatalf("MapToObject() error = %v", err)
+	}
+
+	if obj.Value == nil {
+		t.Fatal("Expected Value to be set")
+	}
+
+	if *obj.Value != "hello" {
+		t.Errorf("Value = %v, want 'hello'", *obj.Value)
+	}
+}
+
+func TestPropertyMapper_SetJSON_Array(t *testing.T) {
+	pm := NewPropertyMapper()
+
+	type TestStruct struct {
+		Tags []string
+	}
+
+	var obj TestStruct
+	data := map[string]interface{}{
+		"tags": `["go", "testing", "coverage"]`,
+	}
+
+	err := pm.MapToObject(data, &obj, []config.PropertyMap{
+		{Object: "Tags", Field: "tags", Type: "json"},
+	})
+
+	if err != nil {
+		t.Fatalf("MapToObject() error = %v", err)
+	}
+
+	if len(obj.Tags) != 3 {
+		t.Errorf("len(Tags) = %d, want 3", len(obj.Tags))
+	}
+
+	if obj.Tags[0] != "go" {
+		t.Errorf("Tags[0] = %v, want 'go'", obj.Tags[0])
+	}
+}
+
+func TestPropertyMapper_GetValue_InvalidField(t *testing.T) {
+	pm := NewPropertyMapper()
+
+	type TestStruct struct {
+		Name string
+	}
+
+	obj := TestStruct{Name: "test"}
+	
+	data, err := pm.MapFromObject(obj, []config.PropertyMap{
+		{Object: "NonExistent", Field: "nonexistent"},
+	})
+
+	if err == nil {
+		t.Error("Expected error for non-existent field, got nil")
+	}
+
+	if data != nil {
+		t.Errorf("Expected nil data for error case, got %v", data)
 	}
 }

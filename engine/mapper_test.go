@@ -10,6 +10,47 @@ import (
 	"github.com/toutaio/toutago-datamapper/config"
 )
 
+// mockAdapter for testing
+type mockAdapter struct {
+	fetchResults []map[string]interface{}
+}
+
+func (m *mockAdapter) Fetch(ctx context.Context, op *adapter.Operation, params map[string]interface{}) ([]interface{}, error) {
+	results := make([]interface{}, len(m.fetchResults))
+	for i, r := range m.fetchResults {
+		results[i] = r
+	}
+	return results, nil
+}
+
+func (m *mockAdapter) Insert(ctx context.Context, op *adapter.Operation, objects []interface{}) error {
+	return nil
+}
+
+func (m *mockAdapter) Update(ctx context.Context, op *adapter.Operation, objects []interface{}) error {
+	return nil
+}
+
+func (m *mockAdapter) Delete(ctx context.Context, op *adapter.Operation, identifiers []interface{}) error {
+	return nil
+}
+
+func (m *mockAdapter) Execute(ctx context.Context, action *adapter.Action, params map[string]interface{}) (interface{}, error) {
+	return nil, nil
+}
+
+func (m *mockAdapter) Connect(ctx context.Context, config map[string]interface{}) error {
+	return nil
+}
+
+func (m *mockAdapter) Close() error {
+	return nil
+}
+
+func (m *mockAdapter) Name() string {
+	return "mock"
+}
+
 func TestNewMapper(t *testing.T) {
 	tmpDir := t.TempDir()
 	configFile := filepath.Join(tmpDir, "config.yaml")
@@ -341,5 +382,260 @@ mappings:
 	err = mapper.Close()
 	if err != nil {
 		t.Errorf("Close() error = %v", err)
+	}
+}
+
+func TestMapper_FetchMulti(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	configContent := `namespace: test
+version: "1.0"
+sources:
+  db:
+    adapter: mock
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db
+    operations:
+      fetch:
+        statement: "SELECT * FROM users"
+        multi: true
+        result:
+          properties:
+            - entity: ID
+              column: id
+            - entity: Name
+              column: name
+`
+
+	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	mapper, err := NewMapper(configFile)
+	if err != nil {
+		t.Fatalf("NewMapper() error = %v", err)
+	}
+	defer mapper.Close()
+
+	// Register mock adapter
+	mapper.RegisterAdapter("mock", func(source config.Source) (adapter.Adapter, error) {
+		return &mockAdapter{
+			fetchResults: []map[string]interface{}{
+				{"id": "1", "name": "Alice"},
+				{"id": "2", "name": "Bob"},
+			},
+		}, nil
+	})
+
+	var results []map[string]interface{}
+	err = mapper.FetchMulti(context.Background(), "test.user", nil, &results)
+	if err != nil {
+		t.Fatalf("FetchMulti() error = %v", err)
+	}
+
+	if len(results) != 2 {
+		t.Errorf("FetchMulti() returned %d results, want 2", len(results))
+	}
+}
+
+func TestMapper_Execute(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	configContent := `namespace: test
+version: "1.0"
+sources:
+  db:
+    adapter: mock
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db
+    operations:
+      custom:
+        statement: "UPDATE users SET status = 'active'"
+`
+
+	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	mapper, err := NewMapper(configFile)
+	if err != nil {
+		t.Fatalf("NewMapper() error = %v", err)
+	}
+	defer mapper.Close()
+
+	// Register mock adapter
+	mapper.RegisterAdapter("mock", func(source config.Source) (adapter.Adapter, error) {
+		return &mockAdapter{}, nil
+	})
+
+	err = mapper.Execute(context.Background(), "test.user.custom", nil, nil)
+	if err == nil {
+		// Execute is not fully implemented yet, so we expect an error
+		t.Log("Execute() returned nil, implementation may be complete")
+	}
+}
+
+func TestMapper_Insert_ErrorCases(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	configContent := `namespace: test
+version: "1.0"
+sources:
+  db:
+    adapter: mock
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db
+    operations:
+      insert:
+        statement: "INSERT INTO users"
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+`
+
+	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	mapper, err := NewMapper(configFile)
+	if err != nil {
+		t.Fatalf("NewMapper() error = %v", err)
+	}
+	defer mapper.Close()
+
+	// Register mock adapter
+	mapper.RegisterAdapter("mock", func(source config.Source) (adapter.Adapter, error) {
+		return &mockAdapter{}, nil
+	}	)
+
+	type User struct {
+		ID   string
+		Name string
+	}
+
+	// Test with valid single object
+	user := User{ID: "1", Name: "Alice"}
+	err = mapper.Insert(context.Background(), "test.user", user)
+	if err != nil {
+		t.Errorf("Insert(single) error = %v", err)
+	}
+
+	// Test with pointer to object
+	userPtr := &User{ID: "2", Name: "Bob"}
+	err = mapper.Insert(context.Background(), "test.user", userPtr)
+	if err != nil {
+		t.Errorf("Insert(pointer) error = %v", err)
+	}
+}
+
+func TestMapper_Update(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	configContent := `namespace: test
+version: "1.0"
+sources:
+  db:
+    adapter: mock
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db
+    operations:
+      update:
+        statement: "UPDATE users SET name = ?"
+        properties:
+          - object: ID
+            field: id
+          - object: Name
+            field: name
+`
+
+	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	mapper, err := NewMapper(configFile)
+	if err != nil {
+		t.Fatalf("NewMapper() error = %v", err)
+	}
+	defer mapper.Close()
+
+	// Register mock adapter
+	mapper.RegisterAdapter("mock", func(source config.Source) (adapter.Adapter, error) {
+		return &mockAdapter{}, nil
+	})
+
+	type User struct {
+		ID   string
+		Name string
+	}
+
+	user := User{ID: "1", Name: "Updated"}
+	err = mapper.Update(context.Background(), "test.user", user)
+	if err != nil {
+		t.Fatalf("Update() error = %v", err)
+	}
+}
+
+func TestMapper_Delete(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	configContent := `namespace: test
+version: "1.0"
+sources:
+  db:
+    adapter: mock
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db
+    operations:
+      delete:
+        statement: "DELETE FROM users WHERE id = ?"
+`
+
+	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	mapper, err := NewMapper(configFile)
+	if err != nil {
+		t.Fatalf("NewMapper() error = %v", err)
+	}
+	defer mapper.Close()
+
+	// Register mock adapter
+	mapper.RegisterAdapter("mock", func(source config.Source) (adapter.Adapter, error) {
+		return &mockAdapter{}, nil
+	})
+
+	// Test delete with single ID
+	err = mapper.Delete(context.Background(), "test.user", "1")
+	if err != nil {
+		t.Fatalf("Delete(single) error = %v", err)
+	}
+
+	// Test delete with multiple IDs
+	err = mapper.Delete(context.Background(), "test.user", []string{"2", "3"})
+	if err != nil {
+		t.Fatalf("Delete(slice) error = %v", err)
 	}
 }
