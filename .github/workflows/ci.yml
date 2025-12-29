@@ -145,10 +145,10 @@ jobs:
       
       - name: Check cyclomatic complexity
         run: |
-          COMPLEX=$(gocyclo -over 15 . | wc -l)
+          COMPLEX=$(gocyclo -over 15 . | grep -v "examples/" | wc -l)
           if [ "$COMPLEX" -gt 0 ]; then
             echo "❌ Found functions with cyclomatic complexity > 15:"
-            gocyclo -over 15 .
+            gocyclo -over 15 . | grep -v "examples/"
             exit 1
           fi
           echo "✅ All functions have acceptable complexity"

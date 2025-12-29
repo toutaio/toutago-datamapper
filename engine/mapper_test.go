@@ -639,3 +639,159 @@ mappings:
 		t.Fatalf("Delete(slice) error = %v", err)
 	}
 }
+
+func TestMapper_Fetch_ErrorCases(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	configContent := `namespace: test
+version: "1.0"
+sources:
+  db:
+    adapter: mock
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db
+    operations:
+      fetch:
+        statement: "SELECT * FROM users WHERE id = ?"
+        result:
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+`
+
+	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	mapper, err := NewMapper(configFile)
+	if err != nil {
+		t.Fatalf("NewMapper() error = %v", err)
+	}
+	defer mapper.Close()
+
+	// Register mock adapter that returns empty results
+	mapper.RegisterAdapter("mock", func(source config.Source) (adapter.Adapter, error) {
+		return &mockAdapter{fetchResults: []map[string]interface{}{}}, nil
+	})
+
+	type User struct {
+		ID   string
+		Name string
+	}
+
+	var user User
+	err = mapper.Fetch(context.Background(), "test.user", map[string]interface{}{"id": "999"}, &user)
+	if err != adapter.ErrNotFound {
+		t.Errorf("Fetch() with no results should return ErrNotFound, got: %v", err)
+	}
+}
+
+func TestMapper_Fetch_WithResult(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	configContent := `namespace: test
+version: "1.0"
+sources:
+  db:
+    adapter: mock
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db
+    operations:
+      fetch:
+        statement: "SELECT * FROM users WHERE id = ?"
+        result:
+          properties:
+            - object: ID
+              field: id
+            - object: Name
+              field: name
+`
+
+	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	mapper, err := NewMapper(configFile)
+	if err != nil {
+		t.Fatalf("NewMapper() error = %v", err)
+	}
+	defer mapper.Close()
+
+	// Register mock adapter that returns a result
+	mapper.RegisterAdapter("mock", func(source config.Source) (adapter.Adapter, error) {
+		return &mockAdapter{
+			fetchResults: []map[string]interface{}{
+				{"id": "1", "name": "Test User"},
+			},
+		}, nil
+	})
+
+	type User struct {
+		ID   string
+		Name string
+	}
+
+	var user User
+	err = mapper.Fetch(context.Background(), "test.user", map[string]interface{}{"id": "1"}, &user)
+	if err != nil {
+		t.Fatalf("Fetch() error = %v", err)
+	}
+
+	if user.ID != "1" {
+		t.Errorf("User.ID = %v, want '1'", user.ID)
+	}
+	if user.Name != "Test User" {
+		t.Errorf("User.Name = %v, want 'Test User'", user.Name)
+	}
+}
+
+func TestMapper_Fetch_NoOperation(t *testing.T) {
+	tmpDir := t.TempDir()
+	configFile := filepath.Join(tmpDir, "config.yaml")
+
+	configContent := `namespace: test
+version: "1.0"
+sources:
+  db:
+    adapter: mock
+    connection: "localhost"
+mappings:
+  user:
+    object: User
+    source: db
+`
+
+	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
+		t.Fatalf("Failed to create config file: %v", err)
+	}
+
+	mapper, err := NewMapper(configFile)
+	if err != nil {
+		t.Fatalf("NewMapper() error = %v", err)
+	}
+	defer mapper.Close()
+
+	mapper.RegisterAdapter("mock", func(source config.Source) (adapter.Adapter, error) {
+		return &mockAdapter{}, nil
+	})
+
+	type User struct {
+		ID string
+	}
+
+	var user User
+	err = mapper.Fetch(context.Background(), "test.user", nil, &user)
+	if err == nil {
+		t.Error("Fetch() should error when no fetch operation defined, got nil")
+	}
+}
