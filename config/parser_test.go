@@ -429,7 +429,7 @@ func TestParser_Validate_NoConfigs(t *testing.T) {
 
 func TestParser_GetAllNamespaces(t *testing.T) {
 	tmpDir := t.TempDir()
-	
+
 	// Create two config files with different namespaces
 	config1 := filepath.Join(tmpDir, "config1.yaml")
 	content1 := `namespace: users

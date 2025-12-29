@@ -433,7 +433,7 @@ func TestPropertyMapper_GetTimestamp(t *testing.T) {
 	}
 
 	obj := TestStruct{CreatedAt: now}
-	
+
 	data, err := pm.MapFromObject(obj, []config.PropertyMap{
 		{Object: "CreatedAt", Field: "created_at", Type: "timestamp"},
 	})
@@ -476,7 +476,7 @@ func TestPropertyMapper_GetJSON(t *testing.T) {
 			City:   "Springfield",
 		},
 	}
-	
+
 	data, err := pm.MapFromObject(obj, []config.PropertyMap{
 		{Object: "Metadata", Field: "metadata", Type: "json"},
 	})
@@ -572,7 +572,7 @@ func TestPropertyMapper_GetValue_InvalidField(t *testing.T) {
 	}
 
 	obj := TestStruct{Name: "test"}
-	
+
 	data, err := pm.MapFromObject(obj, []config.PropertyMap{
 		{Object: "NonExistent", Field: "nonexistent"},
 	})

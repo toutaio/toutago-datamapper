@@ -514,7 +514,7 @@ func TestFilesystemAdapter_WriteAtomic_Errors(t *testing.T) {
 	// Test writing to invalid directory
 	invalidPath := filepath.Join(tmpDir, "nonexistent", "deep", "path", "file.json")
 	data := []byte(`{"test": "data"}`)
-	
+
 	err = fa.writeAtomic(invalidPath, data)
 	if err == nil {
 		t.Error("writeAtomic() expected error for invalid path, got nil")

@@ -520,7 +520,7 @@ mappings:
 	// Register mock adapter
 	mapper.RegisterAdapter("mock", func(source config.Source) (adapter.Adapter, error) {
 		return &mockAdapter{}, nil
-	}	)
+	})
 
 	type User struct {
 		ID   string
