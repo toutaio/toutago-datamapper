@@ -379,8 +379,3 @@ Built with ❤️ using:
 - YAML parser: [gopkg.in/yaml.v3](https://gopkg.in/yaml.v3)
 - Modern CI/CD practices
 - Comprehensive testing and quality standards
-
-## Related Documentation
-
-- [OpenSpec](openspec/) - Complete specification
-- [Project Status](PROJECT_STATUS.md) - Current metrics and progress
