@@ -1,4 +1,4 @@
-# toutago-datamapper
+# DataMapper - Configuration-Driven Data Mapping for Go
 
 [![CI](https://github.com/toutaio/toutago-datamapper/actions/workflows/ci.yml/badge.svg)](https://github.com/toutaio/toutago-datamapper/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/toutaio/toutago-datamapper.svg)](https://pkg.go.dev/github.com/toutaio/toutago-datamapper)
@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Coverage](https://img.shields.io/badge/coverage-80.6%25-brightgreen.svg)](https://github.com/toutaio/toutago-datamapper/actions)
 
-A production-ready Go library for configuration-driven data mapping with complete source abstraction.
+> A production-ready Go library for configuration-driven data mapping with complete source abstraction. Part of the **Toutā Framework** ecosystem.
 
 ## Core Philosophy
 
@@ -379,3 +379,15 @@ Built with ❤️ using:
 - YAML parser: [gopkg.in/yaml.v3](https://gopkg.in/yaml.v3)
 - Modern CI/CD practices
 - Comprehensive testing and quality standards
+
+---
+
+## About Toutā Framework
+
+**Toutā** (Proto-Celtic for "people" or "tribe") is a modular Go web framework emphasizing:
+- Interface-first design for pluggability
+- Configuration-driven architecture
+- Dependency injection for testability
+- Zero framework lock-in
+
+DataMapper is a core component providing complete data source abstraction.
