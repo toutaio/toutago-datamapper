@@ -45,7 +45,7 @@ func (cr *CredentialResolver) LoadEnvFile(path string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open env file %s: %w", path, err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	scanner := bufio.NewScanner(file)
 	lineNum := 0

@@ -24,7 +24,7 @@ jobs:
 
       - name: Run tests
         run: |
-          go test -v -race -coverprofile=coverage.out ./pkg/...
+          go test -v -race -coverprofile=coverage.out ./adapter/... ./config/... ./engine/... ./filesystem/...
           go tool cover -func=coverage.out
 
       - name: Run benchmarks
