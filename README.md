@@ -85,10 +85,15 @@ func main() {
 - ✅ **Zero Dependencies** - Core library uses only Go standard library
 
 ### Available Data Sources
-- ✅ **Filesystem** (built-in) - JSON-based storage
-- ✅ **MySQL** - Full SQL support via [toutago-datamapper-mysql](https://github.com/toutaio/toutago-datamapper-mysql)
-- ✅ **PostgreSQL** - Full SQL support via [toutago-datamapper-postgres](https://github.com/toutaio/toutago-datamapper-postgres)
-- 🔄 **Redis, MongoDB, SQLite** - Coming soon
+### Available Adapters
+
+- ✅ **Filesystem** (built-in) - JSON-based storage for development and testing
+- ✅ **MySQL** - Production-ready SQL support via [toutago-datamapper-mysql](https://github.com/toutaio/toutago-datamapper-mysql)
+- ✅ **PostgreSQL** - Production-ready SQL support via [toutago-datamapper-postgres](https://github.com/toutaio/toutago-datamapper-postgres)
+
+### Community Contributions Welcome
+
+Interested in Redis, MongoDB, or SQLite adapters? We welcome community contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidance on creating new adapters.
 
 ## Quick Example
 
@@ -243,11 +248,13 @@ The core library is database-agnostic. Choose adapters based on your needs:
   `go get github.com/toutaio/toutago-datamapper-postgres`  
   [Documentation & Examples](https://github.com/toutaio/toutago-datamapper-postgres)
 
-#### Planned Adapters
-- Redis
-- MongoDB
-- SQLite
-- REST APIs
+#### Community Contributions
+
+The following adapters would be valuable additions. We welcome community contributions!
+- Redis - Key-value store support
+- MongoDB - Document database support
+- SQLite - Embedded database support
+- REST APIs - HTTP-based data sources
 
 See each adapter's repository for specific documentation, examples, and advanced features.
 
@@ -297,25 +304,27 @@ See each adapter's repository for specific documentation, examples, and advanced
 
 ## Project Roadmap
 
-### ✅ Completed (v0.1.0)
+### ✅ Completed & Released
+
 - **Foundation**: Project setup, adapter interface, CI/CD pipeline
 - **Configuration**: YAML/JSON parser, credential management, CQRS support
 - **Core Engine**: Orchestration engine, property mapper, adapter registry
 - **Reference Implementation**: Filesystem adapter with complete CRUD
-- **Examples & Documentation**: 5 working examples, comprehensive documentation
+- **Examples & Documentation**: 5+ working examples, comprehensive documentation
 - **Quality Assurance**: 80%+ test coverage, production-ready CI/CD
-- **Database Adapters**: MySQL and PostgreSQL adapters available
+- **Database Adapters**: MySQL and PostgreSQL adapters released and production-ready
 
-### 🔄 In Progress
-- **Performance Optimization**: Caching, connection pooling
-- **Advanced Features**: Transactions, migrations, schema validation
-- **Developer Tooling**: CLI tools, code generation utilities
+See [Releases](https://github.com/toutaio/toutago-datamapper/releases) for version history and [CHANGELOG.md](CHANGELOG.md) for details.
 
-### 📋 Planned
+### 🔮 Future Enhancements
+
+Community contributions welcome for:
 - Additional database adapters (SQLite)
 - NoSQL adapters (Redis, MongoDB)
 - API adapters (REST, GraphQL)
 - Advanced CQRS features (event sourcing, saga patterns)
+- Performance optimizations (caching, connection pooling)
+- Developer tooling (CLI tools, code generation)
 
 See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the complete roadmap.
 
@@ -358,10 +367,10 @@ Copyright (c) 2024 Toutaio
 
 ## Project Information
 
-- **Version**: 0.1.0 (Production Ready)
+- **Current Release**: See [Releases](https://github.com/toutaio/toutago-datamapper/releases)
 - **Started**: December 2024
 - **Language**: Go 1.22+
-- **Test Coverage**: 80.6%
+- **Test Coverage**: 80%+
 - **Dependencies**: Zero (core library uses stdlib only)
 - **Status**: Production Ready
 
