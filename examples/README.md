@@ -333,9 +333,6 @@ example-name/
 - [Main README](../README.md) - Project overview
 - [Implementation Plan](../IMPLEMENTATION_PLAN.md) - Roadmap
 - [Quick Start](../QUICKSTART.md) - Getting started
-- [Configuration Guide](../openspec/changes/add-mapper-configuration/SUMMARY.md)
-- [CQRS Guide](../openspec/changes/add-mapper-configuration/CQRS.md)
-- [Credentials Guide](../openspec/changes/add-mapper-configuration/CREDENTIALS.md)
 
 ---
 
@@ -390,9 +387,8 @@ All examples follow these standards:
 
 ### After Running Examples
 1. Read the [Implementation Plan](../IMPLEMENTATION_PLAN.md)
-2. Explore the [Configuration Guide](../openspec/changes/add-mapper-configuration/)
-3. Check the [CQRS Patterns](../openspec/changes/add-mapper-configuration/CQRS.md)
-4. Review [Security Best Practices](../openspec/changes/add-mapper-configuration/CREDENTIALS.md)
+2. Review the main [README](../README.md) for configuration options
+3. Check the [Quick Start Guide](../QUICKSTART.md)
 
 ### Building Your Own
 1. Start with simple-crud template
@@ -437,7 +433,7 @@ A: Use bulk operations to migrate data between sources.
 
 ## 📞 Getting Help
 
-- **Documentation**: See [docs](../openspec/)
+- **Documentation**: See [docs](../docs/) and main [README](../README.md)
 - **Issues**: [GitHub Issues](https://github.com/toutaio/toutago-datamapper/issues)
 - **Examples Not Working?**: Check Go version (requires 1.21+)
 

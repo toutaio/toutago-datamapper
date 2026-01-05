@@ -7,6 +7,12 @@
 
 > A production-ready Go library for configuration-driven data mapping with complete source abstraction. Part of the **Toutā Framework** ecosystem.
 
+## Status
+
+✅ **Production Ready** - Stable v1.0+ releases  
+📦 [View Releases](https://github.com/toutaio/toutago-datamapper/releases) for the latest version  
+📖 [Changelog](CHANGELOG.md) - Full version history
+
 ## Core Philosophy
 
 - **Zero Dependencies**: Domain objects have no library dependencies
@@ -262,10 +268,6 @@ See each adapter's repository for specific documentation, examples, and advanced
 
 - [Implementation Plan](IMPLEMENTATION_PLAN.md) - Detailed roadmap
 - [Quick Start](QUICKSTART.md) - Getting started guide
-- [Configuration Guide](openspec/changes/add-mapper-configuration/SUMMARY.md) - Configuration reference
-- [CQRS Patterns](openspec/changes/add-mapper-configuration/CQRS.md) - CQRS implementation guide
-- [Credential Management](openspec/changes/add-mapper-configuration/CREDENTIALS.md) - Security best practices
-- [Examples](openspec/changes/add-mapper-configuration/EXAMPLES.md) - Configuration examples
 
 ## Examples
 
