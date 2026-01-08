@@ -1,5 +1,7 @@
 # Implementation Plan: toutago-datamapper
 
+> **📜 HISTORICAL DOCUMENT**: This was the original implementation plan. The project is now complete and in production. See [CHANGELOG.md](CHANGELOG.md) for actual release history and [Releases](https://github.com/toutaio/toutago-datamapper/releases) for current versions.
+
 ## Project Overview
 
 **Purpose**: A Go library that provides complete data source abstraction through configuration-driven mapping, allowing applications to perform CRUD operations on domain objects without any knowledge of the underlying storage mechanism.
